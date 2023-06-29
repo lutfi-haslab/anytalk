@@ -1,8 +1,15 @@
-import { ClerkApp, ClerkCatchBoundary, useUser } from "@clerk/remix";
+import {
+  ClerkApp,
+  ClerkCatchBoundary,
+  RedirectToSignIn,
+  SignedIn,
+  SignedOut,
+  useUser,
+} from "@clerk/remix";
 import { getAuth, rootAuthLoader } from "@clerk/remix/ssr.server";
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
-import { LoaderFunction, json } from "@remix-run/node";
+import { LoaderFunction, json, redirect } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -25,8 +32,8 @@ export const loader: LoaderFunction = (args) => {
   return rootAuthLoader(args, async ({ request }) => {
     // const { sessionId, userId, getToken } = request.auth;
     const { userId } = await getAuth(args);
+   
     const userProfile = await findUser(userId || "");
-
     return json<LoaderData>({ userProfile });
   });
 };

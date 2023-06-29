@@ -21,10 +21,10 @@ model User {
 
 model Post {
   id        String    @id @default(cuid())
-  userId    String?
+  userId    String? //userId from clerk
   title     String?
   content   String
-  authorId  String
+  authorId  String //profileId
   Comment   Comment[]
   User      User      @relation(fields: [authorId], references: [id])
   Tag       Tag[]
@@ -43,7 +43,7 @@ model Comment {
 }
 
 model Tag {
-  id   String @id
+  id   String @id @default(cuid())
   name String @unique
   Post Post[]
 }

@@ -10,7 +10,7 @@ export default function SignInRoutes() {
         <LogoLight />
       </div>
       {/* <SignIn routing={"path"} path={"/sign-in"} /> */}
-      <SignIn redirectUrl="/test"/>
+      <SignIn redirectUrl="/"/>
     </div>
   );
 }

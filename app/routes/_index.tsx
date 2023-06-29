@@ -8,18 +8,31 @@ import {
 } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import React from "react";
-import { LeftProfile } from "~/components/card.components";
+import {
+  LeftProfile,
+  SinglePost,
+  Topics,
+  Trends,
+} from "~/components/card.components";
+import { InputPost } from "~/components/input.components";
 import { ModalProfiles2 } from "~/components/modal.components";
-import { createUser, findUser } from "~/models/user.server";
+import { getPosts, getTags } from "~/models/post.server";
+import { createUser } from "~/models/user.server";
+import { formattedDate } from "~/utils/formater";
 
 type LoaderData = {
-  userProfile: Awaited<ReturnType<typeof findUser>>;
+  posts: Awaited<ReturnType<typeof getPosts>>;
+  tags: Awaited<ReturnType<typeof getTags>>;
 };
 export const loader: LoaderFunction = async (args) => {
   const { userId } = await getAuth(args);
-  const userProfile = await findUser(userId || "");
+  const posts = await getPosts(userId || "");
+  const tags = await getTags();
+  if (!userId) {
+    return redirect("/sign-in");
+  }
 
-  return json<LoaderData>({ userProfile });
+  return json<LoaderData>({ posts, tags });
 };
 
 export const action: ActionFunction = async (args) => {
@@ -49,7 +62,7 @@ export const action: ActionFunction = async (args) => {
 };
 
 const IndexRoutes = () => {
-  const { userProfile } = useLoaderData() as LoaderData;
+  const { posts, tags } = useLoaderData() as LoaderData;
   const [openModal, setOpenModal] = React.useState<string | undefined>();
 
   const { user, isLoaded, isSignedIn } = useUser();
@@ -58,12 +71,45 @@ const IndexRoutes = () => {
     return null;
   }
   return (
-    <div>
-      <div className="col-span-3 pt-10">
-        <LeftProfile setOpenModal={setOpenModal} />
+    <>
+      <div className="grid grid-cols-12 bg-light1 h-screen gap-5 px-10 text-black">
+        <div className="col-span-3 pt-10">
+          <LeftProfile setOpenModal={setOpenModal} />
+        </div>
+        <div className="col-span-6 pt-10 overflow-auto h-screen [&::-webkit-scrollbar]:hidden">
+          <InputPost />
+          {/* POST */}
+          <div className="mt-5 grid grid-cols-1 gap-5">
+            {posts.map((item) => (
+              <SinglePost
+                key={item.id}
+                user={user}
+                content={item.content}
+                timestamp={formattedDate(item.createdAt)}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="col-span-3 pt-10">
+          {/* Topics */}
+          <div className="bg-white p-5 rounded-md">
+            <p className="text-xl font-bold">Topics</p>
+            <Topics />
+          </div>
+          {/* Trends */}
+          <div className="bg-white p-5 rounded-md mt-5">
+            <p className="text-xl font-bold">Trends for you</p>
+            {/* Trends Box */}
+            <div className="flex flex-col space-y-3">
+              {tags.map((item, i) => (
+                <Trends key={i} tag={item?.name} count={item?._count?.Post} />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
       <ModalProfiles2 openModal={openModal} setOpenModal={setOpenModal} />
-    </div>
+    </>
   );
 };
 

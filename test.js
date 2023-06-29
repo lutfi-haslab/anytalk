@@ -15,7 +15,7 @@ function extractAndStoreHashtags(postContent) {
   });
 
   // Store the extracted hashtags in the database
-  console.log(tags)
+  console.log(hashtags)
 }
 
 // Example usage

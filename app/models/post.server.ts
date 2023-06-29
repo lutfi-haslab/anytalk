@@ -17,40 +17,98 @@ export async function getPosts(userId: string) {
 }
 
 export async function getTags() {
-  const tags = await prisma.tags.groupBy({
-    by: ["tags"],
-    _count: {
-      tags: true,
+  const tagCounts = await prisma.tag.findMany({
+    select: {
+      id: true,
+      name: true,
+      _count: {
+        select: {
+          Post: true,
+        },
+      },
     },
     orderBy: {
-      _count: {
-        tags: "desc",
+      Post: {
+        _count: "desc",
       },
     },
   });
-
-  return tags;
+  
+  return tagCounts;
 }
 
-export async function createPost(post: { userId: string; content: string }) {
+export async function createPostExample() {
+  const postData = {
+    userId: "user_2QzqvY68b0uUm8VZnx81vISJvGQ", // Replace with the actual user ID
+    content: "Lorem ipsum dolor sit amet",
+    authorId: "cljfxazyy0000v510syzfdh37", // Replace with the actual author ID
+  };
+
+  const tagNames = ["happy", "holiday"]; // Replace with the desired tag names
+
+  const createdPost = await prisma.post.create({
+    data: {
+      ...postData,
+      Tag: {
+        connectOrCreate: tagNames.map((name) => ({
+          where: { name },
+          create: { name },
+        })),
+      },
+    },
+    include: {
+      Tag: true,
+    },
+  });
+
+  console.log("Created Post:", createdPost);
+  return createdPost;
+}
+
+export async function createPost({
+  userId,
+  content,
+  authorId,
+}: {
+  userId: string;
+  content: string;
+  authorId: string;
+}) {
   const hashtagRegex = /#\w+/g;
 
   // Extract hashtags from the post content
-  const hashtags = post.content.match(hashtagRegex);
-  const postData = await prisma.post.create({
-    data: post,
-  });
-
-  const tags = hashtags?.map(async (item, i) => {
-    return await prisma.tags.create({
+  const hashtags = content.match(hashtagRegex);
+  if (hashtags) {
+    const createdPost = await prisma.post.create({
       data: {
-        postId: postData.id,
-        userId: post.userId,
-        tags: item,
-        content: post.content,
+        userId,
+        authorId,
+        content,
+        Tag: {
+          connectOrCreate: hashtags.map((name) => ({
+            where: { name },
+            create: { name },
+          })),
+        },
+      },
+      include: {
+        Tag: true,
       },
     });
+
+    return createdPost;
+  }
+
+  const createdPost = await prisma.post.create({
+    data: {
+      userId,
+      authorId,
+      content,
+    },
+    include: {
+      Tag: true,
+    },
   });
 
-  return tags;
+  return createdPost;
 }

@@ -19,3 +19,42 @@ export async function findUser(clerkUserId: string) {
 
   return data;
 }
+
+export async function updateUserClerk({
+  clerkUserId,
+  profileId,
+  about,
+}: {
+  clerkUserId: string | null;
+  profileId: string | null;
+  about: string | null;
+}) {
+  const url = "https://api.clerk.com/v1";
+  const bearerToken = process.env.CLERK_SECRET_KEY;
+  const body = {
+    public_metadata: {
+      profileId,
+      about,
+    },
+  };
+  const requestOptions = {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${bearerToken}`,
+    },
+    body: JSON.stringify(body),
+  };
+
+  fetch(`${url}/users/${clerkUserId}`, requestOptions)
+    .then((response) => {
+      if (response.ok) {
+        return "Update User metadata is successful";
+      } else {
+        console.error(`Error: ${response.status}`);
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}

@@ -1,6 +1,7 @@
 import { useClerk } from "@clerk/remix";
 import { useProfileStore } from "~/utils/store";
 import { Button } from "./button.components";
+import clsx from "clsx";
 
 export const LeftProfile = ({ setOpenModal }: any) => {
   const { profile } = useProfileStore();
@@ -101,14 +102,11 @@ export const Topics = () => {
 
 export const Trends = ({ tag, count }: { tag: string; count: number }) => {
   return (
-    <div className="bg-blue-200 h-full p-2 flex space-x-2 items-center rounded-md">
-      <div>
-        <p className="text-4xl font-bold">#</p>
-      </div>
-      <div>
-        <p className="font-bold text-lg">{tag}</p>
-        <p>{count}</p>
-      </div>
+    <div className="bg-blue-200 h-full p-2 flex justify-around space-x-2 items-center rounded-md">
+      <p className={clsx("font-bold", tag.length > 7 ? "text-xl" : "text-4xl")}>
+        {tag}
+      </p>
+      <p className="text-2xl font-bold text-gray-500">{count}</p>
     </div>
   );
 };

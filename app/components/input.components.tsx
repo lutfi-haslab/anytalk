@@ -2,8 +2,10 @@ import { Form, useNavigation } from "@remix-run/react";
 import React from "react";
 import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "./button.components";
+import { useProfileStore } from "~/utils/store";
 
-export const InputPost = ({ user }: any) => {
+export const InputPost = () => {
+  const { profile } = useProfileStore();
   const { state } = useNavigation();
   let isAdding = state === "submitting";
   let formRef = React.useRef<HTMLFormElement>(null);
@@ -16,12 +18,18 @@ export const InputPost = ({ user }: any) => {
 
   return (
     <div className="bg-white  p-10 rounded-md">
-      <Form method="post" ref={formRef}>
+      <Form method="post" action="/forms/posts" ref={formRef}>
         <div className="flex justify-between items-center space-x-4">
           <img
-            src={user?.imageUrl ?? "/profile.png"}
+            src={profile?.imgUrl ?? "/profile.png"}
             className="w-20 rounded-full"
           />
+          <input
+            type="hidden"
+            name="userId"
+            defaultValue={profile?.clerkUserId}
+          />
+          <input type="hidden" name="authorId" defaultValue={profile?.id} />
           <TextareaAutosize
             minRows={1}
             maxRows={7}

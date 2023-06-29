@@ -60,7 +60,7 @@ export const ModalProfiles2 = ({
       show={openModal === "dismissible"}
       onClose={() => setOpenModal(undefined)}
     >
-      <Form method="post" ref={formRef}>
+      <Form method="post" action="/forms/user">
         <Modal.Header>User Profiles</Modal.Header>
         <Modal.Body>
           <div className="grid grid-cols-8">
@@ -131,7 +131,7 @@ export const ModalProfiles2 = ({
             {!edit ? "Edit" : "Cancel"}
           </Button>
           {edit && (
-            <Button type="submit" color="warning" name="intent" value="create">
+            <Button type="submit" color="warning">
               Save
             </Button>
           )}
