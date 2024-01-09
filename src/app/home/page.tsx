@@ -2,6 +2,7 @@
 import LeftProfile from "@/components/card/LeftProfile";
 import InputPost from "@/components/card/InputPost";
 import SinglePost from "@/components/card/SinglePost";
+import SinglePost2 from "@/components/card/SinglePost2";
 import Trends from "@/components/card/Trends";
 import Topics from "@/components/card/Topics";
 
@@ -15,6 +16,7 @@ const page = () => {
         <InputPost />
         {/* POST */}
         <div className="mt-5 grid grid-cols-1 gap-5">
+          <SinglePost2 />
           <SinglePost />
           <SinglePost />
           <SinglePost />
