@@ -1,10 +1,132 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-export async function getPosts(userId: string) {
+export async function getAllPosts() {
+  const posts = await prisma.post.findMany({
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+
+  return posts;
+}
+
+async function fetchNestedComments(comment: any) {
+  const nestedComments = await prisma.post.findMany({
+    where: {
+      parentId: comment.id,
+    },
+    include: {
+      responseFrom: true,
+    },
+  });
+
+  if (nestedComments.length === 0) {
+    return [];
+  }
+
+  const nestedCommentsWithReplies: any = await Promise.all(
+    nestedComments.map(async (nestedComment) => {
+      const replies = await fetchNestedComments(nestedComment);
+      return {
+        ...nestedComment,
+        comments: replies,
+      };
+    })
+  );
+
+  return nestedCommentsWithReplies;
+}
+
+export async function getAllPostWithCommentsWithId(userId: string) {
   const posts = await prisma.post.findMany({
     where: {
-      userId,
+      userId
+    },
+    include: {
+      comments: {
+        include: {
+          responseFrom: true,
+        },
+      },
+    },
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+
+  const postsWithNestedComments = await Promise.all(
+    posts.map(async (post) => {
+      const nestedComments = await fetchNestedComments(post);
+      return {
+        ...post,
+        comments: nestedComments,
+      };
+    })
+  );
+
+  return postsWithNestedComments;
+}
+
+export async function getAllPostWithComments() {
+  const posts = await prisma.post.findMany({
+    where: {
+      parentId: null,
+    },
+    include: {
+      comments: {
+        include: {
+          responseFrom: true,
+        },
+      },
+    },
+    orderBy: [
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+
+  const postsWithNestedComments = await Promise.all(
+    posts.map(async (post) => {
+      const nestedComments = await fetchNestedComments(post);
+      return {
+        ...post,
+        comments: nestedComments,
+      };
+    })
+  );
+
+  return postsWithNestedComments;
+}
+
+// export async function getAllPostWithComments() {
+//   const posts = await prisma.post.findMany({
+//     include: {
+//       comments: {
+//         include: {
+//           responseFrom: true,
+//         },
+//       },
+//     },
+//     orderBy: [
+//       {
+//         createdAt: "desc",
+//       },
+//     ],
+//   });
+
+//   return posts;
+// }
+
+export async function getPosts(clerkUserId: string) {
+  const posts = await prisma.post.findMany({
+    where: {
+      clerkUserId,
     },
     orderBy: [
       {
@@ -33,7 +155,7 @@ export async function getTags() {
       },
     },
   });
-  
+
   return tagCounts;
 }
 
@@ -68,11 +190,11 @@ export async function createPostExample() {
 export async function createPost({
   userId,
   content,
-  authorId,
+  clerkUserId,
 }: {
   userId: string;
   content: string;
-  authorId: string;
+  clerkUserId: string;
 }) {
   const hashtagRegex = /#\w+/g;
 
@@ -82,7 +204,7 @@ export async function createPost({
     const createdPost = await prisma.post.create({
       data: {
         userId,
-        authorId,
+        clerkUserId,
         content,
         Tag: {
           connectOrCreate: hashtags.map((name) => ({
@@ -102,7 +224,7 @@ export async function createPost({
   const createdPost = await prisma.post.create({
     data: {
       userId,
-      authorId,
+      clerkUserId,
       content,
     },
     include: {

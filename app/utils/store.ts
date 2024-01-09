@@ -7,6 +7,8 @@ export interface Profile {
     fullName: string | null;
     imgUrl: string | null;
     email: string;
+    following: [] | null | any
+    follower: [] | null | any
     about: string;
     id?: string;
     clerkUserId?: string;
@@ -26,6 +28,8 @@ export const useProfileStore = create<Profile>()(
           about: "",
           id: "",
           clerkUserId: "",
+          following: undefined,
+          follower: undefined
         },
         setProfile: (data: any) => set({ profile: data }),
       }),

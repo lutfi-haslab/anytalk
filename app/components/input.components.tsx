@@ -18,7 +18,7 @@ export const InputPost = () => {
 
   return (
     <div className="bg-white  p-10 rounded-md">
-      <Form method="post" action="/forms/posts" ref={formRef}>
+      <Form method="post" ref={formRef}>
         <div className="flex justify-between items-center space-x-4">
           <img
             src={profile?.imgUrl ?? "/profile.png"}
@@ -26,10 +26,10 @@ export const InputPost = () => {
           />
           <input
             type="hidden"
-            name="userId"
+            name="clerkUserId"
             defaultValue={profile?.clerkUserId}
           />
-          <input type="hidden" name="authorId" defaultValue={profile?.id} />
+          <input type="hidden" name="userId" defaultValue={profile?.id} />
           <TextareaAutosize
             minRows={1}
             maxRows={7}

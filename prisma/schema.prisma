@@ -3,47 +3,81 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // provider = "postgresql"
+  provider = "sqlite"
+  // url      = env("DATABASE_URL")
+  url      = "file:./anytalk-dev.db"
 }
 
 model User {
-  id          String    @id @default(cuid())
-  clerkUserId String    @unique
-  username    String
-  fullName    String?
-  email       String
-  about       String
-  imageUri    String?
-  Comment     Comment[]
-  Post        Post[]
+  id            String          @id @default(uuid())
+  email         String          @unique
+  username      String          @unique
+  password      String?
+  clerkUserId   String          @unique
+  fullName      String?
+  about         String
+  imageUri      String?
+  posts         Post[]
+  likedPosts    PostLikes[]
+  following     UserFollows[]   @relation("UserFollowsUser")
+  followers     UserFollows[]   @relation("UserFollowsTarget")
+  notifications Notifications[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Post {
-  id        String    @id @default(cuid())
-  userId    String? //userId from clerk
-  title     String?
-  content   String
-  authorId  String //profileId
-  Comment   Comment[]
-  User      User      @relation(fields: [authorId], references: [id])
-  Tag       Tag[]
-  createdAt DateTime  @default(now())
-}
-
-model Comment {
-  id        String   @id
-  userId    String?
-  content   String
-  postId    String
-  authorId  String
-  User      User     @relation(fields: [authorId], references: [id])
-  Post      Post     @relation(fields: [postId], references: [id])
-  createdAt DateTime @default(now())
+  id           String      @id @default(uuid())
+  clerkUserId  String?
+  title        String?
+  userId       String
+  from         User        @relation(fields: [userId], references: [id])
+  content      String
+  responseFrom Post?       @relation("PostComments", fields: [parentId], references: [id])
+  comments     Post[]      @relation("PostComments")
+  parentId     String?
+  likes        PostLikes[]
+  Tag          Tag[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now()) @updatedAt
 }
 
 model Tag {
-  id   String @id @default(cuid())
+  id   String @id @default(uuid())
   name String @unique
   Post Post[]
+}
+
+model UserFollows {
+  id       String @id @default(uuid())
+  user     User   @relation("UserFollowsUser", fields: [userId], references: [id])
+  userId   String
+  target   User   @relation("UserFollowsTarget", fields: [targetId], references: [id])
+  targetId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model PostLikes {
+  id     String @id @default(uuid())
+  post   Post   @relation(fields: [postId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  postId String
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Notifications {
+  id      String @id @default(uuid())
+  content String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }

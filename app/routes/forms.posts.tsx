@@ -7,11 +7,11 @@ export const action: ActionFunction = async (args) => {
   const intent = formData.get("intent");
   const content = formData.get("content") as string;
   const userId = formData.get("userId") as string;
-  const authorId = formData.get("authorId") as string;
+  const clerkUserId = formData.get("clerkUserId") as string;
   if (intent === "create") {
     await createPost({
       userId,
-      authorId,
+      clerkUserId,
       content,
     });
 

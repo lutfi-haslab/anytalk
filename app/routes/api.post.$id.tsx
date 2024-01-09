@@ -3,6 +3,7 @@ import { json } from "@remix-run/node";
 import {
   createPostExample,
   getAllPostWithComments,
+  getAllPostWithCommentsWithId,
 } from "~/models/post.server";
 
 export const action = async ({ request }: ActionArgs) => {
@@ -11,7 +12,8 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 export const loader = async ({ params }: LoaderArgs) => {
-  const posts = await getAllPostWithComments();
+  const id = params.id;
+  const posts = await getAllPostWithCommentsWithId(String(id));
 
   return json({ posts });
 };

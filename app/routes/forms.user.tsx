@@ -18,6 +18,7 @@ export const action: ActionFunction = async (args) => {
     email,
     about,
     imageUri: img,
+    password: null
   });
 
   await updateUserClerk({

@@ -1,6 +1,5 @@
 import { useUser } from "@clerk/remix";
-import { getAuth } from "@clerk/remix/ssr.server";
-import { LoaderFunction, json, redirect } from "@remix-run/node";
+import { ActionFunction, LoaderFunction, json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import React from "react";
 import {
@@ -12,18 +11,16 @@ import {
 import { InputPost } from "~/components/input.components";
 import { ModalProfiles2 } from "~/components/modal.components";
 import { useRevalidateOnFocus } from "~/hooks/useRevalidate";
-import { getAllPostWithComments, getTags } from "~/models/post.server";
+import { createPost, getAllPostWithCommentsWithId, getTags } from "~/models/post.server";
 import { formattedDate } from "~/utils/formater";
-import { ActionFunction } from "@remix-run/node";
-import { createPost } from "~/models/post.server";
 
 type LoaderData = {
-  posts: Awaited<ReturnType<typeof getAllPostWithComments>>;
+  posts: Awaited<ReturnType<typeof getAllPostWithCommentsWithId>>;
   tags: Awaited<ReturnType<typeof getTags>>;
 };
 export const loader: LoaderFunction = async (args) => {
-  const { userId } = await getAuth(args);
-  const posts = await getAllPostWithComments();
+  const userId = args.params.userId;
+  const posts = await getAllPostWithCommentsWithId(String(userId));
   const tags = await getTags();
   if (!userId) {
     return redirect("/sign-in");
